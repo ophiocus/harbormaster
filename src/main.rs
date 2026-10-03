@@ -23,8 +23,12 @@ pub const APP_GH_REPO: &str = "ophiocus/lighthouse";
 
 fn main() -> eframe::Result<()> {
     // Headless one-shot: gather and print, no GUI. Handy for cron/CI checks.
-    if std::env::args().any(|a| a == "--probe") {
-        run_probe();
+    // `--json` emits the same snapshot as one machine-readable document — the
+    // feed for the dashboard, and for anything else that wants the numbers
+    // rather than the table.
+    let args: Vec<String> = std::env::args().collect();
+    if args.iter().any(|a| a == "--probe") {
+        run_probe(args.iter().any(|a| a == "--json"));
         return Ok(());
     }
 
@@ -67,9 +71,11 @@ fn describe_analytics(s: &model::AnalyticsState) -> String {
     }
 }
 
-fn run_probe() {
+fn run_probe(as_json: bool) {
     let cfg = config::Config::load();
-    println!("lighthouse probe → {}", cfg.host_alias);
+    if !as_json {
+        println!("lighthouse probe → {}", cfg.host_alias);
+    }
     // The headless path wants the complete picture in one shot, so it does
     // synchronously what the GUI splits into two passes.
     let collected = telemetry::collect(&cfg.host_alias).map(|mut f| {
@@ -79,6 +85,51 @@ fn run_probe() {
         f
     });
     match collected {
+        Ok(f) if as_json => {
+            // One document, everything the board has. The measurement verdict is
+            // computed here rather than left to the consumer, so every reader
+            // agrees on it instead of each re-deriving the rule.
+            let rows: Vec<_> = f
+                .rows
+                .iter()
+                .map(|r| {
+                    let emitted = r.http.as_ref().and_then(|h| h.emitted_tag.as_deref());
+                    serde_json::json!({
+                        "project": r.p,
+                        "type": r.ptype.label(),
+                        "http": r.http,
+                        "health": r.health.label(),
+                        "analytics": r.analytics,
+                        "measurement": model::derive_measurement(emitted, &r.analytics).label(),
+                    })
+                })
+                .collect();
+            let doc = serde_json::json!({
+                "schema": "harbormaster/snapshot/1",
+                "generated": f.generated,
+                "berth": cfg.host_alias,
+                "totals": {
+                    "projects": f.total,
+                    "healthy": f.healthy,
+                    "drupal": f.drupal_count,
+                    "node": f.node_count,
+                },
+                "host": f.host,
+                "gaps": f.gaps.iter().map(|g| serde_json::json!({
+                    "severity": format!("{:?}", g.sev).to_lowercase(),
+                    "label": g.label,
+                    "text": g.text,
+                })).collect::<Vec<_>>(),
+                "rows": rows,
+            });
+            match serde_json::to_string_pretty(&doc) {
+                Ok(s) => println!("{s}"),
+                Err(e) => {
+                    eprintln!("ERROR: serialise snapshot: {e}");
+                    std::process::exit(1);
+                }
+            }
+        }
         Ok(f) => {
             println!(
                 "{} projects ({} Drupal, {} Node)  healthy {}/{}  gaps {}  (snapshot {})",

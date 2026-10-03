@@ -2,11 +2,11 @@
 //! [`Project`]) plus the derived, render-ready [`Fleet`]. Project *type* drives
 //! which control template applies (see `template.rs`).
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 // ── Discovery payload ───────────────────────────────────────────────────────
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Gather {
     pub generated: String,
     pub projects: Vec<Project>,
@@ -14,7 +14,7 @@ pub struct Gather {
 }
 
 /// One discovered project on the VPS, classified by its compose stack.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Project {
     pub slug: String,
     #[serde(rename = "type")]
@@ -40,7 +40,7 @@ pub struct Project {
     pub tls: String,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Host {
     pub disk: String,
     pub disk_pct: u8,
@@ -55,7 +55,7 @@ pub struct Host {
 
 // ── Project type — the axis the control template keys off ───────────────────
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[allow(dead_code)] // Unknown is a defensive fallback for unclassified stacks
 pub enum ProjectType {
     Drupal,
@@ -82,7 +82,7 @@ impl ProjectType {
 
 // ── HTTP probe (measured from the workstation) ──────────────────────────────
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct HttpProbe {
     pub code: u16,
     pub latency_ms: u128,
@@ -100,7 +100,7 @@ pub struct HttpProbe {
 
 /// What a GA4 property actually recorded. Distinct from every other signal on
 /// this board: those say the property *serves*, this says it is *measured*.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Analytics {
     pub property_id: String,
     pub display_name: String,
@@ -118,7 +118,7 @@ pub struct Analytics {
 
 /// Analytics is an independent lane and never gates health, so every outcome —
 /// including "not configured" — is a state rather than an error.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub enum AnalyticsState {
     /// No credential on this workstation. Not a fault.
     Disabled,
@@ -137,7 +137,7 @@ pub enum AnalyticsState {
 /// The verdict from crossing **what the page emits** against **what the property
 /// recorded**. This is the point of the analytics lane: the two disagree in
 /// exactly the ways no other signal on this board can see.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 pub enum Measurement {
     /// Tag ships and data is arriving.
     Measured,
@@ -209,7 +209,7 @@ pub fn derive_measurement(emitted: Option<&str>, a: &AnalyticsState) -> Measurem
 
 // ── Derived, render-ready fleet ─────────────────────────────────────────────
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 pub enum Health {
     Up,
     Warn,
@@ -228,13 +228,13 @@ impl Health {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 pub enum Sev {
     Crit,
     Warn,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Gap {
     pub sev: Sev,
     pub label: String,
@@ -242,7 +242,7 @@ pub struct Gap {
 }
 
 /// A project merged with its workstation HTTP probe and derived health.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Row {
     pub p: Project,
     pub ptype: ProjectType,
@@ -251,7 +251,7 @@ pub struct Row {
     pub analytics: AnalyticsState,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Fleet {
     pub generated: String,
     pub rows: Vec<Row>,

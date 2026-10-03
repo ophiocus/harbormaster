@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HarborMaster — board</title>
+<link rel="stylesheet" href="vendor/uPlot.min.css">
+<style>
+  :root {
+    --ground: #0e1218;
+    --card: #161b24;
+    --surface2: #1c222d;
+    --line: #27303d;
+    --ink: #dfe6ef;
+    --mute: #7c8a9c;
+    --good: #46c88a;
+    --warn: #e0a23c;
+    --crit: #e05c5c;
+    --accent: #4bb8d8;
+    --node: #9b7fd4;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 22px 26px 40px;
+    background: var(--ground); color: var(--ink);
+    font: 14px/1.5 "Segoe UI", system-ui, sans-serif;
+  }
+  code, .mono { font-family: "Cascadia Mono", Consolas, ui-monospace, monospace; }
+  h1 { font-size: 23px; font-weight: 400; margin: 0 0 3px; letter-spacing: .2px; }
+  .sub { color: var(--mute); font-size: 12px; margin-bottom: 20px; }
+  .sub b { color: var(--ink); font-weight: 500; }
+  .stale { color: var(--warn); }
+
+  .strip { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+  .kpi {
+    background: var(--card); border: 1px solid var(--line); border-radius: 9px;
+    padding: 11px 17px; min-width: 128px;
+  }
+  .kpi .k { color: var(--mute); font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; }
+  .kpi .v { font-size: 25px; line-height: 1.25; }
+  .kpi .n { color: var(--mute); font-size: 11.5px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(430px, 1fr)); gap: 16px; }
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 11px; padding: 15px 17px; }
+  .panel h2 {
+    font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--mute); margin: 0 0 3px;
+  }
+  .panel .why { color: var(--mute); font-size: 11.5px; margin: 0 0 11px; }
+  .chart { width: 100%; height: 268px; }
+  .wide { grid-column: 1 / -1; }
+
+  table.fleet { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.fleet th {
+    text-align: left; color: var(--mute); font-weight: 500; font-size: 10.5px;
+    letter-spacing: .08em; text-transform: uppercase; padding: 0 10px 7px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  table.fleet td { padding: 8px 10px 8px 0; border-bottom: 1px solid var(--surface2); }
+  table.fleet tr:last-child td { border-bottom: 0; }
+  .pill {
+    display: inline-block; padding: 1px 8px; border-radius: 10px;
+    font-size: 11px; background: var(--surface2);
+  }
+  .good { color: var(--good); } .warn { color: var(--warn); }
+  .crit { color: var(--crit); } .mute { color: var(--mute); }
+
+  ul.gaps { list-style: none; padding: 0; margin: 0; }
+  ul.gaps li { padding: 7px 0; border-bottom: 1px solid var(--surface2); font-size: 13px; }
+  ul.gaps li:last-child { border-bottom: 0; }
+  ul.gaps .lbl { font-weight: 600; }
+  .empty { color: var(--mute); font-size: 13px; padding: 14px 0; }
+  .u-legend { font-size: 12px; }
+</style>
+</head>
+<body>
+
+<h1>HarborMaster</h1>
+<div class="sub" id="subtitle"></div>
+
+<div class="strip" id="kpis"></div>
+
+<div class="grid">
+  <div class="panel wide">
+    <h2>Cargo</h2>
+    <p class="why">Serving is one question, being measured is another. They fail separately.</p>
+    <div id="fleet"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Response time</h2>
+    <p class="why">Measured from this workstation, at each property's own apex.</p>
+    <div class="chart" id="latency"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Certificate runway</h2>
+    <p class="why">Days until each certificate expires. Under 21 raises a gap.</p>
+    <div class="chart" id="tls"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Berth headroom</h2>
+    <p class="why">Host disk, memory and load for the whole berth.</p>
+    <div class="chart" id="host"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Open gaps</h2>
+    <p class="why">What the board wants a human to look at.</p>
+    <ul class="gaps" id="gaps"></ul>
+  </div>
+
+  <div class="panel wide">
+    <h2>Response time over snapshots</h2>
+    <p class="why">Built from the kept history. Thin until snapshots accumulate; this is the panel the per-minute telemetry will land in.</p>
+    <div class="chart" id="series" style="height:300px"></div>
+  </div>
+</div>
+
+<script src="vendor/echarts.min.js"></script>
+<script src="vendor/uPlot.iife.min.js"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,3 +1,9 @@
 /target
 *.msi
 *.log
+
+# Dashboard readings are generated from a live berth on every build, and the
+# history is this workstation's own record. The page and its vendored libraries
+# are committed; the data is not.
+/dashboard/data.js
+/dashboard/history.jsonl
