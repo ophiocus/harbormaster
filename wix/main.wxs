@@ -10,19 +10,19 @@
 
     <!--
       Tokens rewritten by scripts/new_app.ps1:
-        Lighthouse       : display name (e.g. "My App")
-        lighthouse       : lowercase folder name (e.g. "myapp")
-        lighthouse        : executable name without .exe (matches Cargo `[[bin]]`)
+        HarborMaster     : display name (e.g. "My App")
+        harbormaster     : lowercase folder name (e.g. "myapp")
+        harbormaster      : executable name without .exe (matches Cargo `[[bin]]`)
         ophiocus
-        Fleet health telemetry for the Tecnocratica VPS
-        https://github.com/ophiocus/lighthouse
+        Platform runner for the webrunners berths
+        https://github.com/ophiocus/harbormaster
         AA3FEE2D-2906-4100-9DC0-362CDB69ADC0   : fresh UUID per app
         6908FF9E-B0F3-4D7D-92FD-367D6F1BD9E7
         4AC72183-5687-4D3D-97FD-7CD21A5C3FF6
     -->
     <Product
         Id='*'
-        Name='Lighthouse'
+        Name='HarborMaster'
         UpgradeCode='AA3FEE2D-2906-4100-9DC0-362CDB69ADC0'
         Manufacturer='ophiocus'
         Language='1033'
@@ -31,7 +31,7 @@
 
         <Package Id='*'
             Keywords='Installer'
-            Description='Fleet health telemetry for the Tecnocratica VPS'
+            Description='Platform runner for the webrunners berths'
             Manufacturer='ophiocus'
             InstallerVersion='450'
             Languages='1033'
@@ -46,11 +46,11 @@
             DowngradeErrorMessage='A newer version of [ProductName] is already installed. Setup will now exit.'/>
 
         <Media Id='1' Cabinet='media1.cab' EmbedCab='yes' DiskPrompt='CD-ROM #1'/>
-        <Property Id='DiskPrompt' Value='lighthouse Installation'/>
+        <Property Id='DiskPrompt' Value='HarborMaster Installation'/>
 
         <Directory Id='TARGETDIR' Name='SourceDir'>
             <Directory Id='$(var.PlatformProgramFilesFolder)' Name='PFiles'>
-                <Directory Id='APPLICATIONFOLDER' Name='lighthouse'>
+                <Directory Id='APPLICATIONFOLDER' Name='harbormaster'>
 
                     <Directory Id='Bin' Name='bin'>
                         <Component Id='Path' Guid='6908FF9E-B0F3-4D7D-92FD-367D6F1BD9E7' KeyPath='yes'>
@@ -66,9 +66,9 @@
                         <Component Id='binary0' Guid='*'>
                             <File
                                 Id='exe0'
-                                Name='lighthouse.exe'
+                                Name='harbormaster.exe'
                                 DiskId='1'
-                                Source='$(var.CargoTargetBinDir)\lighthouse.exe'
+                                Source='$(var.CargoTargetBinDir)\harbormaster.exe'
                                 KeyPath='yes'/>
                         </Component>
                     </Directory>
@@ -82,15 +82,15 @@
                     -->
                     <Component Id='StartMenuShortcut' Guid='CE264D8C-21E2-47C3-9A45-49DBDAC988EB'>
                         <Shortcut Id='StartMenuShortcut'
-                            Name='Lighthouse'
-                            Description='Fleet health telemetry for the Tecnocratica VPS'
+                            Name='HarborMaster'
+                            Description='Platform runner for the webrunners berths'
                             Directory='ProgramMenuFolder'
-                            Target='[Bin]lighthouse.exe'
+                            Target='[Bin]harbormaster.exe'
                             WorkingDirectory='Bin'
                             Icon='ProductICO' />
                         <!-- ICE43: a non-advertised shortcut needs an HKCU keypath. -->
                         <RegistryValue Root='HKCU'
-                            Key='Software\ophiocus\Lighthouse'
+                            Key='Software\ophiocus\HarborMaster'
                             Name='StartMenuShortcut'
                             Type='integer'
                             Value='1'
@@ -98,14 +98,14 @@
                     </Component>
                     <Component Id='DesktopShortcut' Guid='4AC72183-5687-4D3D-97FD-7CD21A5C3FF6'>
                         <Shortcut Id='DesktopShortcut'
-                            Name='Lighthouse'
-                            Description='Fleet health telemetry for the Tecnocratica VPS'
+                            Name='HarborMaster'
+                            Description='Platform runner for the webrunners berths'
                             Directory='DesktopFolder'
-                            Target='[Bin]lighthouse.exe'
+                            Target='[Bin]harbormaster.exe'
                             WorkingDirectory='Bin'
                             Icon='ProductICO' />
                         <RegistryValue Root='HKCU'
-                            Key='Software\ophiocus\Lighthouse'
+                            Key='Software\ophiocus\HarborMaster'
                             Name='DesktopShortcut'
                             Type='integer'
                             Value='1'
@@ -144,7 +144,7 @@
 
         <Icon Id='ProductICO' SourceFile='assets\icon.ico'/>
         <Property Id='ARPPRODUCTICON' Value='ProductICO' />
-        <Property Id='ARPHELPLINK' Value='https://github.com/ophiocus/lighthouse'/>
+        <Property Id='ARPHELPLINK' Value='https://github.com/ophiocus/harbormaster'/>
 
         <UI>
             <UIRef Id='WixUI_FeatureTree'/>

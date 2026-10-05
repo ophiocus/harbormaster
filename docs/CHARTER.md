@@ -2,8 +2,8 @@
 
 > **Status:** ruled by Carlos 2026-10-02; written the same day. Supersedes the
 > scope in `README.md`. Folds in `docs/OPS_PLAN.md` (2026-09-16) and
-> `docs/ANALYTICS_PLAN.md` as phases. Formerly **Lighthouse**: the rename is
-> planned in §9 and not yet executed.
+> `docs/ANALYTICS_PLAN.md` as phases. Formerly **Lighthouse**: the rename in §9
+> was **executed 2026-10-05** (milestone H0).
 
 ## 1. What it is
 
@@ -205,27 +205,34 @@ places.
 
 ## 9. The rename: Lighthouse → HarborMaster
 
-Display name **HarborMaster**; identifier `harbormaster`. Nothing below has been
-done yet.
+Display name **HarborMaster**; identifier `harbormaster`. **Executed
+2026-10-05.** The table records what was done; `✅` marks it.
+
+The one thing that had to survive the rename is the WiX **`UpgradeCode`**
+(`AA3FEE2D-…`). It, not the product name, is what makes a new MSI upgrade the
+installed Lighthouse 0.1.0 in place instead of installing a second product
+beside it. The two component GUIDs were kept for the same reason, and a guard in
+the rename script failed the run if any of the three had gone missing.
 
 | Where | Change |
 |---|---|
-| GitHub | rename `ophiocus/lighthouse` → `ophiocus/harbormaster`. GitHub redirects the old URL, so installed v0.x copies still find their update |
-| `Cargo.toml` | `name = "harbormaster"`; description |
-| `src/main.rs` | `APP_NAME`, `APP_WINDOW_TITLE`, `APP_GH_REPO`; `LighthouseApp` → `HarborMasterApp` |
-| config | `%APPDATA%\Lighthouse\config.json` → `%APPDATA%\HarborMaster\`, read once from the old path if the new one is missing |
-| config shape | `host_alias` → a list of berths, read from `berths/*/berth.toml` |
-| `wix/main.wxs` | display name, folder, exe, Start-menu shortcut, registry key. **Keep the `UpgradeCode`**, so the MSI upgrades the installed Lighthouse in place |
-| local checkout | `I:\lighthouse` → `I:\harbormaster`. Do it from outside any session anchored there |
-| icon, README, docs | new name, with the lingo |
-| webrunners | the docs naming Lighthouse (BOUTIQUE_TRANSITION §11, CODEBASE_PERFORMANCE_AUDIT is about Google's Lighthouse — leave that one), swivel lanes, memory |
-| release | `v0.2.0` "HarborMaster" — the first build under the new name |
+| ✅ `Cargo.toml` | `name = "harbormaster"`, version `0.2.0`, new description |
+| ✅ `src/` | `APP_NAME`, `APP_WINDOW_TITLE`, `APP_GH_REPO`, `LighthouseApp` → `HarborMasterApp`, HTTP user agent, the board's own title label now reads `APP_NAME` rather than a literal |
+| ✅ config | reads `%APPDATA%\HarborMaster\config.json`; on a first run with none, reads `%APPDATA%\Lighthouse\config.json` once and writes it forward, so an upgraded install keeps its settings |
+| ✅ `wix/main.wxs` | product name, folder, exe, shortcuts, registry key `Software\ophiocus\HarborMaster`. **`UpgradeCode` and both component GUIDs unchanged** |
+| ✅ docs | README, ANALYTICS_PLAN, OPS_PLAN renamed; this file keeps its historical statements on purpose |
+| ✅ GitHub | renamed `ophiocus/lighthouse` → `ophiocus/harbormaster`; GitHub redirects the old URL, so installed v0.x copies still reach their update |
+| ✅ local checkout | `I:\lighthouse` → `I:\harbormaster` |
+| ✅ webrunners | the docs and lanes naming Lighthouse. `CODEBASE_PERFORMANCE_AUDIT` is about **Google's** Lighthouse and was deliberately left alone |
+| **not done** — config shape | `host_alias` → a list of berths from `berths/*/berth.toml`. This is **H1**, not the rename; the single `host_alias` still stands |
+| **not done** — release | tag `v0.2.0` and let CI build the MSI, then prove self-update from the installed Lighthouse 0.1.0 |
+| **not done** — icon | still the Lighthouse mark. New art exists at `I:\AIProd\harbormaster\` and has not been cut in |
 
 ## 10. Milestones
 
 | ID | Delivers | Risk |
 |---|---|---|
-| **H0** | Rename (§9), released as v0.2.0, self-update proven from an installed Lighthouse | none to the fleet |
+| **H0** | Rename (§9) — **done 2026-10-05** apart from the `v0.2.0` tag and proving self-update from the installed Lighthouse 0.1.0 | none to the fleet |
 | **H1** | Berths: `berths/ssdnodes1/berth.toml`, a multi-berth config, board grouped by berth, `ssdnodes1` SSH alias | read-only |
 | **H2** | The DNA: spreader in the skeleton and the five images; PHP explorer; log readers; reading verbs (`harbormaster read ttfb|spreader|db|host <berth> [cargo]`). First use: the before/after verdict on the 2026-10 platform tuning | one image change per property; read-only otherwise |
 | **H3** | Config ownership: §7's moves, `harbormaster install <berth>` replacing `infra/install.sh` and `infra/host/install.sh` | host files rewritten from a new source: diff-checked against the berth first |

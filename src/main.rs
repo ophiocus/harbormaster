@@ -16,10 +16,10 @@ use eframe::egui;
 
 // These constants are the single source of truth for app identity.
 // The bootstrap script (scripts/new_app.ps1) rewrites them for a new app.
-pub const APP_NAME: &str = "Lighthouse";
-pub const APP_WINDOW_TITLE: &str = "Lighthouse";
+pub const APP_NAME: &str = "HarborMaster";
+pub const APP_WINDOW_TITLE: &str = "HarborMaster";
 // GitHub repo in "owner/repo" form — used by the update checker.
-pub const APP_GH_REPO: &str = "ophiocus/lighthouse";
+pub const APP_GH_REPO: &str = "ophiocus/harbormaster";
 
 fn main() -> eframe::Result<()> {
     // Headless one-shot: gather and print, no GUI. Handy for cron/CI checks.
@@ -43,7 +43,7 @@ fn main() -> eframe::Result<()> {
     eframe::run_native(
         APP_NAME,
         native_options,
-        Box::new(|cc| Ok(Box::new(app::LighthouseApp::new(cc)))),
+        Box::new(|cc| Ok(Box::new(app::HarborMasterApp::new(cc)))),
     )
 }
 
@@ -74,7 +74,7 @@ fn describe_analytics(s: &model::AnalyticsState) -> String {
 fn run_probe(as_json: bool) {
     let cfg = config::Config::load();
     if !as_json {
-        println!("lighthouse probe → {}", cfg.host_alias);
+        println!("harbormaster probe → {}", cfg.host_alias);
     }
     // The headless path wants the complete picture in one shot, so it does
     // synchronously what the GUI splits into two passes.

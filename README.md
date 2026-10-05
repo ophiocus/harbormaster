@@ -1,4 +1,4 @@
-# Lighthouse
+# HarborMaster
 
 Fleet health telemetry for the Tecnocrática VPS — a native desktop board that
 shows, at a glance, whether every property on the node is up, current, and
@@ -13,7 +13,7 @@ VPS over SSH. That single choice dissolves the two problems a server-hosted
 board would have:
 
 - **No recursion.** A dashboard hosted *on* the node can't report the node's own
-  outage. Lighthouse runs elsewhere, so a dead node reads as "unreachable"
+  outage. HarborMaster runs elsewhere, so a dead node reads as "unreachable"
   rather than going dark with everything else.
 - **No container boundary.** An unprivileged container can't see host disk, OS
   updates, or `docker` state. `ssh <host> 'docker inspect / df / apt …'` lands
@@ -49,7 +49,7 @@ builds are windowed (`windows_subsystem = "windows"`).
 
 ## Config
 
-`%APPDATA%\Lighthouse\config.json`:
+`%APPDATA%\HarborMaster\config.json`:
 
 | Key | Default | Meaning |
 | --- | --- | --- |

@@ -1,4 +1,4 @@
-# Feature plan — analytics in Lighthouse
+# Feature plan — analytics in HarborMaster
 
 > Status: **P0 and P1 shipped and verified against the live fleet, 2026-09-08.**
 > P2–P4 proposed. See the phase table for what landed.
@@ -11,7 +11,7 @@
 
 ## The gap this closes
 
-Lighthouse answers **"is the property up?"**. It cannot answer **"is the
+HarborMaster answers **"is the property up?"**. It cannot answer **"is the
 property being measured?"** Those two fail independently, and the second failure
 is silent.
 
@@ -19,7 +19,7 @@ The case that proves it: `zero-shot-games` emitted a correct GA4 tag and recorde
 **zero events for six weeks** (2026-07-26 → 2026-09-04). Consent Mode v2 was set
 to `analytics_storage:'denied'` with `wait_for_update:500`, and no consent
 platform ever issued the update — one was assumed and never configured. `gtag.js`
-loaded on every page and measured nothing. Throughout, *every signal Lighthouse
+loaded on every page and measured nothing. Throughout, *every signal HarborMaster
 has today was green*: container running, HTTP 200, Drupal bootstrapped, DB
 connected, TLS valid. The board would have shown a healthy property for six weeks
 while the business signal was dead.
@@ -67,7 +67,7 @@ properties are probed at the wrong hostname**:
 | tecnocratica, tempowatch, zero-shot-games | — | correct | correct |
 
 `oidoenvivo` is the worst case. Its first label is `oidoenvivo.club`, whose DNS
-still points at **GoDaddy parking**, not the VPS. So today Lighthouse probes a
+still points at **GoDaddy parking**, not the VPS. So today HarborMaster probes a
 114-byte parking redirect, gets **HTTP 200**, and reports the property healthy on
 the strength of a page that is not the site. Its TLS field comes back **empty**,
 so cert-expiry warning is silently blind for that property.
@@ -195,7 +195,7 @@ facts. That also avoids parsing dates entirely, which sidesteps the
 property-timezone trap.
 
 BLIND is the zero-shot-games failure. DARK is a lost env var or a bad deploy.
-Neither is visible to any signal Lighthouse has today.
+Neither is visible to any signal HarborMaster has today.
 
 Guard against false alarms on genuinely new properties: only raise BLIND when the
 property has **at least one prior day with events** and has since been silent for
@@ -255,14 +255,14 @@ about instead of something that fails silently.
   turn a permissions change into a red board.
 - **Reading the probe body costs a full page fetch per property per refresh.**
   Cap the read; do not follow into assets.
-- Windows locks `target\debug\lighthouse.exe` while the app runs; `taskkill //F
-  //IM lighthouse.exe` before rebuilding.
+- Windows locks `target\debug\harbormaster.exe` while the app runs; `taskkill //F
+  //IM harbormaster.exe` before rebuilding.
 - Push from WSL so the `github-ssdnodes` alias resolves.
 
 ## What this makes redundant
 
 `infra/scripts/analytics-audit` in the webrunners repo (`I:\web_server`) audits
 by emission and is the current source of truth for "is analytics running". Once
-P2 lands, Lighthouse does that plus the data half the shell script structurally
+P2 lands, HarborMaster does that plus the data half the shell script structurally
 cannot see. Keep the script as the headless CI check, or retarget it at
-`lighthouse --probe`, but stop maintaining two answers to the same question.
+`harbormaster --probe`, but stop maintaining two answers to the same question.

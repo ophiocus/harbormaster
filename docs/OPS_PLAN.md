@@ -1,4 +1,4 @@
-# Operations plan — Lighthouse takes over backups, migrations and releases
+# Operations plan — HarborMaster takes over backups, migrations and releases
 
 > Status: **proposed, 2026-09-16.** Nothing here is built yet. Every "today"
 > claim below was read from the live VPS and the workstation on 2026-09-16,
@@ -6,7 +6,7 @@
 
 ## The goal
 
-Lighthouse today answers "is the fleet up, current and measured?". This plan
+HarborMaster today answers "is the fleet up, current and measured?". This plan
 makes it the operator's console for the work that changes the fleet:
 
 1. **Every product is backable.** Each property's full state can be captured,
@@ -21,27 +21,27 @@ makes it the operator's console for the work that changes the fleet:
 
 ## Principles this keeps
 
-- **Off-box.** Lighthouse stays on the workstation and reaches the host over
+- **Off-box.** HarborMaster stays on the workstation and reaches the host over
   SSH. That is also what makes it the natural owner of the off-host copy: it
   already runs on the second machine.
-- **Host scripts execute; Lighthouse drives.** The host tooling in
+- **Host scripts execute; HarborMaster drives.** The host tooling in
   `web_server/infra/` (`backup`, `restore`, `deploy-prod`, `tec-site-apex`) is
-  the single implementation. Lighthouse calls it and never re-implements it in
+  the single implementation. HarborMaster calls it and never re-implements it in
   Rust. New capability is added to `infra/`, shipped by `infra/install.sh`, and
-  surfaced by Lighthouse.
+  surfaced by HarborMaster.
 - **Discovery, not lists.** `tec-site-apex --list` is the registry. Nothing in
   this plan adds a hand-maintained property list, and it removes the two that
   exist.
 - **Platform policy wins** (`web_server/docs/CORE_INFRASTRUCTURE_POLICY.md`):
-  - §0.1: the operator is the only source of intent. Lighthouse proposes and
+  - §0.1: the operator is the only source of intent. HarborMaster proposes and
     shows the exact command; the operator confirms every mutating step.
-  - §0.2: Lighthouse may turn maintenance ON; turning it OFF stays a human
+  - §0.2: HarborMaster may turn maintenance ON; turning it OFF stays a human
     click, never a step inside a flow.
   - §0.4: destructive steps show their blast radius and need a typed
     confirmation, not a single click.
   - §0.5: secrets never leave the box in cleartext. Off-box secret bundles are
     encrypted at rest.
-  - §0.7: the installed base is the truth. Lighthouse's first new job is
+  - §0.7: the installed base is the truth. HarborMaster's first new job is
     reporting where the host and the repo disagree.
 
 ## What the estate looks like today
@@ -86,7 +86,7 @@ Drupal properties.
    the `mariadb:11.4` tag has moved: three DB containers run an 2026-08-24
    build, two run a 2026-09-09 build. A rebuild today would not reproduce what
    is running.
-9. **Lighthouse's own Redeploy bypasses `deploy-prod`.** It runs compose
+9. **HarborMaster's own Redeploy bypasses `deploy-prod`.** It runs compose
    pull/up and `drush deploy` itself, so it skips the sitemap regeneration and
    the maintenance guarantee that the CI path gets.
 10. **No manual-operation log.** Policy §9.4 names `~/deploy.log`; it does not
@@ -132,7 +132,7 @@ normal releases.
 | P1 | Close the coverage gaps; off-host copy on a schedule | additive host changes |
 | P2 | Portable bundles; restore anywhere; automated restore drills | writes only to throwaway targets |
 | P3 | Rebuild a whole host from bundles | needs a second target |
-| P4 | Releases, rollbacks and migrations driven from Lighthouse | mutating, gated |
+| P4 | Releases, rollbacks and migrations driven from HarborMaster | mutating, gated |
 
 ### P0 — See it (read-only)
 
@@ -146,7 +146,7 @@ normal releases.
   `web_server/infra/scripts` twin; host-only tools; stray backup files; each
   running container's image digest against the tag's current digest; floating
   tags.
-- Lighthouse reads the workstation vault and shows its age per property.
+- HarborMaster reads the workstation vault and shows its age per property.
 - Board: a **DR readiness** strip per property (on-box backup age, off-box
   copy age, last drill result) and a host strip for edge, host config and
   drift. Stale or missing turns amber, then red.
@@ -174,9 +174,9 @@ In `web_server/infra` (shipped by `install.sh`):
 - `deploy-prod` appends one line per deploy to a digest ledger per property
   (time, previous digest, new digest, git rev). This is the rollback history.
 
-In Lighthouse:
+In HarborMaster:
 
-- A headless mode, `lighthouse --pull-backups`, alongside the existing
+- A headless mode, `harbormaster --pull-backups`, alongside the existing
   `--probe`, run by Windows Task Scheduler without stealing focus (the
   `silent-watcher` pattern). It pulls whenever the workstation is on and
   records success on the board.
@@ -200,7 +200,7 @@ fresh.
     fatal markers).
 - The DDEV target replaces the manual parts of `fetch-prod` for a point-in-time
   restore; `fetch-prod` stays the tool for "latest prod".
-- **Automated restore drill.** Monthly, Lighthouse restores each property's
+- **Automated restore drill.** Monthly, HarborMaster restores each property's
   newest bundle into a throwaway local target and checks that content really
   loads: for Drupal, entity loads return a non-zero count (the lesson from the
   2026-08-20 unrestorable-dump incident); for myevery, `PRAGMA
@@ -248,7 +248,7 @@ Releases:
   GitHub is down.
 - **Rollback** picks a previous digest from the ledger and redeploys it,
   followed by `drush config:import` and the health gate (DR-2, codified).
-- Lighthouse's Redeploy button is rewired to call `deploy-prod <slug>`.
+- HarborMaster's Redeploy button is rewired to call `deploy-prod <slug>`.
 
 Migrations:
 

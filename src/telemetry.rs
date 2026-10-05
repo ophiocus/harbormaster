@@ -20,7 +20,7 @@ pub fn collect(host_alias: &str) -> Result<Fleet, String> {
     let client = reqwest::blocking::Client::builder()
         .timeout(Duration::from_secs(15))
         .redirect(reqwest::redirect::Policy::limited(5))
-        .user_agent("lighthouse/0.1")
+        .user_agent("harbormaster/0.2")
         .build()
         .map_err(|e| format!("http client: {e}"))?;
 

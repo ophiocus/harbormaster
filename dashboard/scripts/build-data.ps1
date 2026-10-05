@@ -24,7 +24,7 @@ $here = Split-Path -Parent $PSScriptRoot          # ...\dashboard
 $repo = Split-Path -Parent $here                  # repo root
 
 if (-not $Exe) {
-    foreach ($c in @("$repo\target\release\lighthouse.exe", "$repo\target\debug\lighthouse.exe")) {
+    foreach ($c in @("$repo\target\release\harbormaster.exe", "$repo\target\debug\harbormaster.exe")) {
         if (Test-Path $c) { $Exe = $c; break }
     }
 }

@@ -86,7 +86,7 @@ impl Palette {
     }
 }
 
-pub struct LighthouseApp {
+pub struct HarborMasterApp {
     pub config: Config,
 
     fleet: Option<Fleet>,
@@ -109,7 +109,7 @@ pub struct LighthouseApp {
     update_rx: Option<mpsc::Receiver<Option<UpdateAvailable>>>,
 }
 
-impl LighthouseApp {
+impl HarborMasterApp {
     pub fn new(cc: &eframe::CreationContext<'_>) -> Self {
         let config = Config::load();
         apply_visuals(&cc.egui_ctx, config.dark_mode);
@@ -245,7 +245,7 @@ impl LighthouseApp {
     }
 }
 
-impl eframe::App for LighthouseApp {
+impl eframe::App for HarborMasterApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         self.poll();
 
@@ -296,7 +296,7 @@ impl eframe::App for LighthouseApp {
     }
 }
 
-impl LighthouseApp {
+impl HarborMasterApp {
     fn render_confirm(&mut self, ctx: &egui::Context, pal: &Palette) {
         let Some(pending) = self.pending.clone() else { return };
         let mut decision = 0u8; // 1 = cancel, 2 = run
@@ -402,12 +402,12 @@ fn apply_visuals(ctx: &egui::Context, dark: bool) {
 
 // ── top / bottom bars ───────────────────────────────────────────────────────
 
-fn top_bar(app: &mut LighthouseApp, ctx: &egui::Context, pal: &Palette) {
+fn top_bar(app: &mut HarborMasterApp, ctx: &egui::Context, pal: &Palette) {
     egui::TopBottomPanel::top("top_bar")
         .frame(Frame::none().fill(pal.card).inner_margin(Margin::symmetric(14.0, 6.0)))
         .show(ctx, |ui| {
             ui.horizontal(|ui| {
-                ui.label(RichText::new("Lighthouse").strong().color(pal.ink));
+                ui.label(RichText::new(crate::APP_NAME).strong().color(pal.ink));
                 ui.label(RichText::new(&app.config.host_alias).monospace().size(11.0).color(pal.mute));
                 ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                     ui.menu_button("View", |ui| {
@@ -431,7 +431,7 @@ fn top_bar(app: &mut LighthouseApp, ctx: &egui::Context, pal: &Palette) {
         });
 }
 
-fn bottom_bar(app: &mut LighthouseApp, ctx: &egui::Context) {
+fn bottom_bar(app: &mut HarborMasterApp, ctx: &egui::Context) {
     egui::TopBottomPanel::bottom("bottom_bar").show(ctx, |ui| {
         ui.horizontal(|ui| {
             crate::git_update::render(
@@ -446,7 +446,7 @@ fn bottom_bar(app: &mut LighthouseApp, ctx: &egui::Context) {
 
 // ── header ──────────────────────────────────────────────────────────────────
 
-fn header(ui: &mut egui::Ui, pal: &Palette, app: &LighthouseApp) {
+fn header(ui: &mut egui::Ui, pal: &Palette, app: &HarborMasterApp) {
     ui.horizontal(|ui| {
         ui.label(RichText::new(BOARD_TITLE).size(24.0).strong().color(pal.ink));
         ui.with_layout(Layout::right_to_left(Align::Center), |ui| {

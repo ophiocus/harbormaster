@@ -1215,6 +1215,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "harbormaster"
+version = "0.2.0"
+dependencies = [
+ "dirs",
+ "eframe",
+ "egui",
+ "reqwest",
+ "rfd",
+ "serde",
+ "serde_json",
+ "winres",
+]
+
+[[package]]
 name = "hashbrown"
 version = "0.15.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1646,20 +1660,6 @@ dependencies = [
  "libc",
  "plain",
  "redox_syscall 0.7.4",
-]
-
-[[package]]
-name = "lighthouse"
-version = "0.1.0"
-dependencies = [
- "dirs",
- "eframe",
- "egui",
- "reqwest",
- "rfd",
- "serde",
- "serde_json",
- "winres",
 ]
 
 [[package]]

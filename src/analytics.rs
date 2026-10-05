@@ -340,7 +340,7 @@ fn get_json<T: for<'de> Deserialize<'de>>(
 pub fn client() -> Result<reqwest::blocking::Client, Error> {
     reqwest::blocking::Client::builder()
         .timeout(Duration::from_secs(20))
-        .user_agent("lighthouse/0.1")
+        .user_agent("harbormaster/0.2")
         .build()
         .map_err(|e| Error::Http(e.to_string()))
 }

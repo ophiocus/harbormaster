@@ -32,12 +32,38 @@ impl Config {
         Self::dir().map(|p| p.join("config.json"))
     }
 
-    pub fn load() -> Self {
-        let Some(p) = Self::path() else { return Self::default() };
-        std::fs::read_to_string(&p)
+    /// The pre-rename config location. An installed copy upgraded in place keeps
+    /// its settings here, and the MSI does not move it, so the first run under
+    /// the new name has to go and find it.
+    fn legacy_path() -> Option<PathBuf> {
+        dirs::config_dir().map(|p| p.join("Lighthouse").join("config.json"))
+    }
+
+    /// Read and parse one config file, or `None` if it is absent or unreadable.
+    fn read(p: &PathBuf) -> Option<Self> {
+        std::fs::read_to_string(p)
             .ok()
             .and_then(|s| serde_json::from_str(&s).ok())
-            .unwrap_or_default()
+    }
+
+    pub fn load() -> Self {
+        let Some(p) = Self::path() else { return Self::default() };
+
+        if let Some(cfg) = Self::read(&p) {
+            return cfg;
+        }
+
+        // Nothing at the new path: fall back to the old one exactly once, and
+        // write it forward so the next run reads the new location and the
+        // fallback never fires again.
+        if let Some(old) = Self::legacy_path() {
+            if let Some(cfg) = Self::read(&old) {
+                cfg.save();
+                return cfg;
+            }
+        }
+
+        Self::default()
     }
 
     pub fn save(&self) {

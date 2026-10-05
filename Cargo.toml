@@ -1,9 +1,9 @@
 [package]
-name = "lighthouse"
-version = "0.1.0"
+name = "harbormaster"
+version = "0.2.0"
 edition = "2021"
 authors = ["ophiocus <csantanad@gmail.com>"]
-description = "Fleet health telemetry for the Tecnocratica VPS"
+description = "Platform runner for the webrunners berths"
 license = "MIT"
 
 [dependencies]
