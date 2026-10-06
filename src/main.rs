@@ -3,6 +3,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod actions;
+mod adsense;
 mod analytics;
 mod app;
 mod config;
@@ -82,6 +83,7 @@ fn run_probe(as_json: bool) {
         telemetry::attach_analytics(&mut f.rows);
         let mut extra = telemetry::analytics_gaps(&f.rows);
         f.gaps.append(&mut extra);
+        f.adsense = telemetry::fetch_adsense();
         f
     });
     match collected {
@@ -115,6 +117,7 @@ fn run_probe(as_json: bool) {
                     "node": f.node_count,
                 },
                 "host": f.host,
+                "adsense": f.adsense,
                 "gaps": f.gaps.iter().map(|g| serde_json::json!({
                     "severity": format!("{:?}", g.sev).to_lowercase(),
                     "label": g.label,

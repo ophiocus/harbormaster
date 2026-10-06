@@ -207,6 +207,58 @@ pub fn derive_measurement(emitted: Option<&str>, a: &AnalyticsState) -> Measurem
     }
 }
 
+// ── AdSense (the revenue lane, also measured from the workstation) ──────────
+
+#[derive(Debug, Clone, Serialize)]
+pub struct AdSenseSite {
+    pub domain: String,
+    /// `READY` can serve. `NEEDS_ATTENTION`, `REQUIRES_REVIEW` and
+    /// `GETTING_READY` cannot, whatever the page is emitting.
+    pub state: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct DomainEarnings {
+    pub domain: String,
+    /// Formatted by the API with its currency symbol, e.g. "$0.00".
+    pub earnings: String,
+    pub page_views: u64,
+    pub impressions: u64,
+    pub clicks: u64,
+}
+
+/// What AdSense reports for the one publisher this credential owns.
+///
+/// Earnings alone are not the story. A tag can be live on a page while the ad
+/// client sits in `GETTING_READY` and nothing is ever served — which is exactly
+/// the state found on 2026-10-05. So the states travel with the numbers, and a
+/// zero is always explainable rather than merely displayed.
+#[derive(Debug, Clone, Serialize)]
+pub struct AdSense {
+    pub account: String,
+    pub display_name: String,
+    pub account_state: String,
+    pub publisher_id: String,
+    /// `READY` means the client can serve; anything else means it cannot.
+    pub client_state: String,
+    pub unpaid: String,
+    pub window_days: i64,
+    pub sites: Vec<AdSenseSite>,
+    pub alerts: Vec<String>,
+    pub by_domain: Vec<DomainEarnings>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub enum AdSenseState {
+    Disabled,
+    Loading,
+    Ok(AdSense),
+    /// The credential owns no AdSense account. An answer, not a fault.
+    NoAccount,
+    AuthExpired,
+    Error(String),
+}
+
 // ── Derived, render-ready fleet ─────────────────────────────────────────────
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
@@ -261,6 +313,9 @@ pub struct Fleet {
     pub total: usize,
     pub drupal_count: usize,
     pub node_count: usize,
+    /// Account-level, not per-cargo: one publisher covers the whole fleet, and
+    /// its per-domain earnings are matched to cargo in the view.
+    pub adsense: AdSenseState,
 }
 
 // ── Tests ───────────────────────────────────────────────────────────────────

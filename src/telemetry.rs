@@ -67,7 +67,36 @@ pub fn collect(host_alias: &str) -> Result<Fleet, String> {
         host: Some(gather.host),
         gaps,
         rows,
+        adsense: AdSenseState::Loading,
     })
+}
+
+/// Fetch the AdSense picture. Runs in the same second pass as the GA4 lane and
+/// shares its token, so the board still paints on health data alone.
+///
+/// Infallible for the same reason as [`attach_analytics`]: revenue is a lane,
+/// not a health signal, and a dead credential must never blank the board.
+pub fn fetch_adsense() -> AdSenseState {
+    let Some(path) = analytics::default_credential_path() else {
+        return AdSenseState::Disabled;
+    };
+    let Ok(adc) = analytics::load_adc(&path) else {
+        return AdSenseState::Disabled;
+    };
+    let Ok(client) = analytics::client() else {
+        return AdSenseState::Disabled;
+    };
+    let token = match analytics::access_token(&client, &adc) {
+        Ok(t) => t,
+        Err(analytics::Error::AuthExpired) => return AdSenseState::AuthExpired,
+        Err(e) => return AdSenseState::Error(e.to_string()),
+    };
+    match crate::adsense::collect(&client, &token) {
+        Ok(Some(a)) => AdSenseState::Ok(a),
+        Ok(None) => AdSenseState::NoAccount,
+        Err(analytics::Error::AuthExpired) => AdSenseState::AuthExpired,
+        Err(e) => AdSenseState::Error(e.to_string()),
+    }
 }
 
 /// Fill in each row's GA4 state.

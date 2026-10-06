@@ -192,6 +192,93 @@
   }
   function pct(v) { return v >= 85 ? C.crit : v >= 70 ? C.warn : C.good; }
 
+  // ── AdSense ───────────────────────────────────────────────────────────────
+  // Deliberately state-first. On 2026-10-05 the publisher had a live tag on a
+  // page and had still never served an ad, because the ad client sat in
+  // GETTING_READY. Showing the zero without the reason would be true and
+  // useless, so the states lead and the money follows.
+  renderAdsense();
+  function renderAdsense() {
+    var el = document.getElementById('adsense');
+    var a = snap.adsense;
+    var ok = a && typeof a === 'object' ? a.Ok : null;
+
+    if (!ok) {
+      var why = {
+        AuthExpired: 'credential expired — re-run infra/scripts/mint_adc.py',
+        Disabled: 'no credential on this workstation',
+        NoAccount: 'this credential owns no AdSense account',
+        Loading: 'checking…'
+      }[a] || (a && a.Error ? 'unavailable: ' + a.Error : 'unavailable');
+      el.innerHTML = '<div class="empty">' + esc(why) + '</div>';
+      return;
+    }
+
+    var serving = ok.client_state === 'READY';
+    var rows = ok.by_domain || [];
+    var sum = function (k) {
+      return rows.reduce(function (s, r) { return s + (r[k] || 0); }, 0);
+    };
+
+    var h = '<table class="fleet"><thead><tr>' +
+      '<th>publisher</th><th>account</th><th>ad client</th><th>unpaid</th>' +
+      '<th>earnings · ' + ok.window_days + 'd</th><th>page views</th><th>impressions</th><th>clicks</th>' +
+      '</tr></thead><tbody><tr>' +
+      '<td class="mono">' + esc(ok.publisher_id) + '</td>' +
+      '<td class="' + (ok.account_state === 'READY' ? 'good' : 'warn') + '">' + esc(ok.account_state) + '</td>' +
+      '<td class="' + (serving ? 'good' : 'crit') + '">' + esc(ok.client_state) + '</td>' +
+      '<td class="mono">' + esc(ok.unpaid) + '</td>' +
+      '<td class="mono">' + (rows.length ? esc(rows[0].earnings) : '—') + '</td>' +
+      '<td class="mono">' + sum('page_views') + '</td>' +
+      '<td class="mono">' + sum('impressions') + '</td>' +
+      '<td class="mono">' + sum('clicks') + '</td>' +
+      '</tr></tbody></table>';
+
+    if (!serving) {
+      h += '<p class="why" style="margin-top:11px"><span class="crit">Not serving.</span> ' +
+        'The ad client is ' + esc(ok.client_state) + ', so every figure above is ' +
+        'structurally zero — not a quiet month.</p>';
+    }
+
+    if (ok.sites && ok.sites.length) {
+      h += '<table class="fleet" style="margin-top:11px"><thead><tr><th>site</th><th>state</th></tr></thead><tbody>';
+      ok.sites.forEach(function (s) {
+        h += '<tr><td class="mono">' + esc(s.domain) + '</td>' +
+          '<td class="' + (s.state === 'READY' ? 'good' : 'warn') + '">' + esc(s.state) + '</td></tr>';
+      });
+      h += '</tbody></table>';
+    }
+
+    if (ok.alerts && ok.alerts.length) {
+      h += '<ul class="gaps" style="margin-top:9px">';
+      ok.alerts.forEach(function (x) {
+        h += '<li><span class="warn">' + esc(x) + '</span></li>';
+      });
+      h += '</ul>';
+    }
+
+    if (rows.length > 1) {
+      h += '<div class="chart" id="adsEarn" style="height:220px;margin-top:12px"></div>';
+    }
+    el.innerHTML = h;
+
+    // Only worth a chart when there is more than one domain to compare.
+    if (rows.length > 1) {
+      echarts.init(document.getElementById('adsEarn')).setOption(Object.assign({}, base, {
+        xAxis: axisVal('page views'),
+        yAxis: axisCat(rows.map(function (r) { return r.domain; })),
+        series: [{
+          type: 'bar', barWidth: '58%',
+          data: rows.map(function (r) { return { value: r.page_views, itemStyle: { color: C.accent } }; }),
+          label: {
+            show: true, position: 'right', color: C.mute, fontSize: 11,
+            formatter: function (p) { return rows[p.dataIndex].earnings; }
+          }
+        }]
+      }));
+    }
+  }
+
   // ── uPlot: the only time axis on the page ─────────────────────────────────
   drawSeries();
   function drawSeries() {
