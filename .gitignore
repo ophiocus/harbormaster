@@ -7,3 +7,4 @@
 # are committed; the data is not.
 /dashboard/data.js
 /dashboard/history.jsonl
+/dashboard/reports/
